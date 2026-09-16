@@ -154,7 +154,7 @@ The averaged ground truth is representative rather than aggregator-specific: it 
 
 <p align="center"><sub><b>Figure 3.</b> SAM has no medical vocabulary, yet its zero-shot masks trace the same morphological boundaries a pathologist annotates. We use these masks as pseudo-structural regions.</sub></p>
 
-Existing transferability metrics were designed for single images. Applied to WSIs, unsupervised ones treat thousands of patches as i.i.d. samples and ignore tissue organization, while supervised ones mean-pool a slide into one vector and let abundant background tissue dilute the diagnostic signal of small regions. Both metrics below start from the same ingredients: patch embeddings $z_{i,j}$ from a candidate FE $\phi$, and SAM masks $\mathcal{M}_i = \lbrace M_{i,k} \rbrace$ computed once per slide.
+Existing transferability metrics were designed for single images. Applied to WSIs, unsupervised ones treat thousands of patches as i.i.d. samples and ignore tissue organization, while supervised ones mean-pool a slide into one vector and let abundant background tissue dilute the diagnostic signal of small regions. Both metrics below start from the same ingredients: patch embeddings $z_{i,j}$ from a candidate FE $\phi$, and SAM region masks $M_{i,k}$ computed once per slide.
 
 ### SAM-Cluster · unsupervised
 
