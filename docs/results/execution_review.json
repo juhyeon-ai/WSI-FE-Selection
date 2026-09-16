@@ -1,0 +1,99 @@
+{
+  "date": "2026-09-16",
+  "scope": "Local synthetic CPU execution review; not a real-WSI/GPU or paper benchmark.",
+  "baseline": "Local release-review snapshot before block loading, SAM copy avoidance, shared-grid mapping and centroid caching.",
+  "timing": "Wall time inside evaluate()/merge_features(), excluding Python startup and top-level imports.",
+  "memory": "Linux process peak RSS from resource.getrusage(RUSAGE_SELF).ru_maxrss.",
+  "threads": {
+    "OPENBLAS_NUM_THREADS": 1,
+    "OMP_NUM_THREADS": 1,
+    "MKL_NUM_THREADS": 1
+  },
+  "cpu": "12th Gen Intel(R) Core(TM) i9-12900K",
+  "scoring": {
+    "baseline": {
+      "median_seconds": 1.8129528379649855,
+      "median_peak_mib": 417.8515625
+    },
+    "candidate": {
+      "median_seconds": 1.717122929985635,
+      "median_peak_mib": 284.40234375
+    },
+    "setup": {
+      "slides": 8,
+      "encoders": 2,
+      "patches_per_slide": 20000,
+      "dimensions": 512,
+      "dtype": "float32",
+      "max_patches": 6000,
+      "reduce_dim": 128,
+      "threads": 1,
+      "repeats": 3,
+      "exact_score_and_rank_equality": true
+    },
+    "trials": {
+      "baseline": [
+        {
+          "seconds": 1.8129528379649855,
+          "peak_mib": 417.8515625
+        },
+        {
+          "seconds": 1.8171877279528417,
+          "peak_mib": 417.7578125
+        },
+        {
+          "seconds": 1.81150086899288,
+          "peak_mib": 418.0703125
+        }
+      ],
+      "candidate": [
+        {
+          "seconds": 1.7337244920199737,
+          "peak_mib": 284.30078125
+        },
+        {
+          "seconds": 1.7166927439975552,
+          "peak_mib": 284.7109375
+        },
+        {
+          "seconds": 1.717122929985635,
+          "peak_mib": 284.40234375
+        }
+      ]
+    }
+  },
+  "additional": {
+    "all_seven_metrics_exactly_equal": true,
+    "sam_lp_modes": [
+      "soft",
+      "topk"
+    ],
+    "em_iters": 3,
+    "merge": {
+      "setup": {
+        "slides": 1,
+        "encoders": 4,
+        "patches": 10000,
+        "dimensions": 32,
+        "repeats": 3
+      },
+      "seconds": {
+        "baseline": [
+          0.3171130000264384,
+          0.31108052597846836,
+          0.31992983602685854
+        ],
+        "candidate": [
+          0.08379204000812024,
+          0.08421180298319086,
+          0.08319349901285022
+        ]
+      },
+      "medians": {
+        "baseline": 0.3171130000264384,
+        "candidate": 0.08379204000812024
+      },
+      "arrays_exactly_equal": true
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "manifest": "../examples/slides.csv",
+  "work_dir": "../runs/quickstart",
+  "trident_dir": "../third_party/TRIDENT",
+  "sam_checkpoint": "../checkpoints/sam_vit_h_4b8939.pth",
+  "encoders": ["resnet50", "uni_v1"],
+  "n_slides": 30,
+  "score_config": "suitability.json",
+  "sampling": "balanced",
+  "gpu": 0,
+  "magnification": 20,
+  "patch_size": 256,
+  "batch_size": 64,
+  "segmenter": "hest",
+  "thumbnail_size": 2048,
+  "sam_model_type": "vit_h",
+  "points_per_side": 32,
+  "pred_iou_thresh": 0.2,
+  "stability_score_thresh": 0.3,
+  "min_mask_region_area": 256
+}

@@ -23,11 +23,16 @@ from __future__ import annotations
 from typing import Literal
 import numpy as np
 
+from .config import DEFAULT_CONFIG, metric_kwargs
+
+_SHARED = DEFAULT_CONFIG["shared"]
+_DEFAULTS = metric_kwargs(DEFAULT_CONFIG, "self_cluster")
+
 
 # =========================
 # Preprocessing (per WSI)
 # =========================
-def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+def l2_normalize_rows(X: np.ndarray, eps: float = _SHARED["eps"]) -> np.ndarray:
     X = X.astype(np.float64, copy=False)
     n = np.linalg.norm(X, axis=1, keepdims=True)
     return X / (n + eps)
@@ -35,9 +40,9 @@ def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
 
 def gaussian_random_projection(
     X: np.ndarray,
-    out_dim: int = 128,
-    seed: int = 0,
-    eps: float = 1e-12,
+    out_dim: int = _SHARED["reduce_dim"],
+    seed: int = _SHARED["seed"],
+    eps: float = _SHARED["eps"],
 ) -> np.ndarray:
     """
     X: (n, d) -> (n, out_dim), Gaussian random projection.
@@ -58,7 +63,7 @@ def gaussian_random_projection(
 
 def pca_project(
     X: np.ndarray,
-    out_dim: int = 128,
+    out_dim: int = _SHARED["reduce_dim"],
 ) -> np.ndarray:
     """
     PCA per WSI (fit on X) using SVD:
@@ -94,10 +99,10 @@ def pca_project(
 
 def preprocess_wsi(
     Z: np.ndarray,
-    eps: float = 1e-12,
-    reduce_method: Literal["none", "pca", "gaussian"] = "none",
-    reduce_dim: int = 128,
-    reduce_seed: int = 0,
+    eps: float = _SHARED["eps"],
+    reduce_method: Literal["none", "pca", "gaussian"] = _DEFAULTS["reduce_method"],
+    reduce_dim: int = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
 ) -> np.ndarray:
     """
     Per-WSI preprocessing:
@@ -127,10 +132,10 @@ def preprocess_wsi(
 # =========================
 def self_cluster_score_one(
     Z: np.ndarray,
-    eps: float = 1e-12,
-    reduce_method: Literal["none", "pca", "gaussian"] = "none",
-    reduce_dim: int = 128,
-    reduce_seed: int = 0,
+    eps: float = _SHARED["eps"],
+    reduce_method: Literal["none", "pca", "gaussian"] = _DEFAULTS["reduce_method"],
+    reduce_dim: int = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
 ) -> float:
     """
     Self-Cluster score for one WSI patch embedding matrix Z (n, d).
@@ -175,11 +180,11 @@ def self_cluster_score_slides(
     sam_clusters: list[np.ndarray],  # accepted for API alignment; NOT used
     labels: np.ndarray,             # accepted for API alignment; NOT used
     *,
-    eps: float = 1e-12,
-    reduce_method: Literal["none", "pca", "gaussian"] = "none",
-    reduce_dim: int = 128,
-    reduce_seed: int = 0,
-    aggregate: Literal["mean", "median"] = "mean",
+    eps: float = _SHARED["eps"],
+    reduce_method: Literal["none", "pca", "gaussian"] = _DEFAULTS["reduce_method"],
+    reduce_dim: int = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
+    aggregate: Literal["mean", "median"] = _DEFAULTS["aggregate"],
 ) -> float:
     """
     Unified interface:

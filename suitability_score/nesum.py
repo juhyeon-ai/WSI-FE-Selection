@@ -14,11 +14,16 @@
 from __future__ import annotations
 import numpy as np
 
+from .config import DEFAULT_CONFIG, metric_kwargs
+
+_SHARED = DEFAULT_CONFIG["shared"]
+_DEFAULTS = metric_kwargs(DEFAULT_CONFIG, "nesum")
+
 
 # =========================
 # L2 Normalization (patch-wise)
 # =========================
-def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+def l2_normalize_rows(X: np.ndarray, eps: float = _SHARED["eps"]) -> np.ndarray:
     norms = np.linalg.norm(X, axis=1, keepdims=True)
     norms = np.maximum(norms, eps)
     return X / norms
@@ -29,9 +34,9 @@ def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
 # =========================
 def gaussian_random_projection(
     X: np.ndarray,
-    out_dim: int = 128,
-    seed: int = 0,
-    eps: float = 1e-12,
+    out_dim: int = _SHARED["reduce_dim"],
+    seed: int = _SHARED["seed"],
+    eps: float = _SHARED["eps"],
 ) -> np.ndarray:
     """
     Random Gaussian projection:
@@ -62,11 +67,11 @@ def gaussian_random_projection(
 # =========================
 def nesum_score(
     Z: np.ndarray,
-    eps: float = 1e-12,
-    center: bool = False,
+    eps: float = _SHARED["eps"],
+    center: bool = _DEFAULTS["center"],
     # preprocessing
-    reduce_dim: int | None = 128,
-    reduce_seed: int = 0,
+    reduce_dim: int | None = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
 ) -> float:
     """
     Compute NESum for one slide.

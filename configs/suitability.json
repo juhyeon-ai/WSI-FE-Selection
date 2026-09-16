@@ -1,0 +1,47 @@
+{
+  "metrics": ["nesum", "self_cluster", "sam_cluster", "linear_probing", "sam_lp"],
+  "shared": {
+    "reduce_dim": 128,
+    "seed": 0,
+    "max_patches": 6000,
+    "eps": 1e-12
+  },
+  "linear_probe": {
+    "C": 1.0,
+    "max_iter": 2000
+  },
+  "nesum": {
+    "center": false
+  },
+  "self_cluster": {
+    "reduce_method": "gaussian",
+    "aggregate": "mean"
+  },
+  "sam_cluster": {
+    "reduce_method": "gaussian",
+    "min_cluster_ratio": 0.005,
+    "n_pairs": 20000,
+    "rng_seed_offsets": [0, 1],
+    "cluster_sampling": "uniform",
+    "ratio_topk_exclude": 0,
+    "ratio_sim_threshold": 0.95,
+    "oversample_factor": 6.0,
+    "max_seconds": null,
+    "dtype": "float32"
+  },
+  "sam_lp": {
+    "em_iters": 1,
+    "min_cluster_size": 20,
+    "select_mode": "soft",
+    "topk": 1,
+    "beta": 5.0,
+    "weight_mode": "linear"
+  },
+  "effective_dimension": {
+    "explained_var": 0.99,
+    "center": true
+  },
+  "logme": {
+    "warmup_numba": false
+  }
+}

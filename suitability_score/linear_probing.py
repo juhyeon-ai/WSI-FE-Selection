@@ -13,11 +13,16 @@
 from __future__ import annotations
 import numpy as np
 
+from .config import DEFAULT_CONFIG, metric_kwargs
+
+_SHARED = DEFAULT_CONFIG["shared"]
+_DEFAULTS = metric_kwargs(DEFAULT_CONFIG, "linear_probing")
+
 
 # =========================
 # L2 Normalization
 # =========================
-def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+def l2_normalize_rows(X: np.ndarray, eps: float = _SHARED["eps"]) -> np.ndarray:
     norms = np.linalg.norm(X, axis=1, keepdims=True)
     norms = np.maximum(norms, eps)
     return X / norms
@@ -31,8 +36,8 @@ _GAUSS_CACHE = {}  # (seed, in_dim, out_dim) -> projection matrix
 
 def gaussian_projection(
     X: np.ndarray,
-    out_dim: int,
-    seed: int = 0,
+    out_dim: int = _SHARED["reduce_dim"],
+    seed: int = _SHARED["seed"],
 ) -> np.ndarray:
     """
     Random Gaussian projection:
@@ -85,12 +90,12 @@ def mean_pool_slide_embeddings(
 def linear_probing_score(
     patch_embeddings: list[np.ndarray],
     labels: np.ndarray,
-    C: float = 1.0,
-    max_iter: int = 2000,
-    seed: int = 0,
-    reduce_dim: int | None = None,
-    reduce_seed: int = 0,
-    eps: float = 1e-12,
+    C: float = _DEFAULTS["C"],
+    max_iter: int = _DEFAULTS["max_iter"],
+    seed: int = _SHARED["seed"],
+    reduce_dim: int | None = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
+    eps: float = _SHARED["eps"],
 ) -> float:
     """
     Linear Probing Score (average log-likelihood).

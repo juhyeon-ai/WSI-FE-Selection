@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper listed below."
+type: software
+license: Apache-2.0
+title: "WSI-FE-Selection"
+authors:
+  - family-names: Kim
+    given-names: Juhyeon
+  - family-names: Ssemakula
+    given-names: Paul
+  - family-names: Song
+    given-names: Chanjae
+  - family-names: Yi
+    given-names: Mun Yong
+repository-code: "https://github.com/juhyeon-ai/WSI-FE-Selection"
+preferred-citation:
+  type: conference-paper
+  title: "SAM-Cluster and SAM-LP: Structure-Aware Evaluation Metrics for Selecting WSI Feature Extractors without MIL Training"
+  authors:
+    - family-names: Kim
+      given-names: Juhyeon
+    - family-names: Ssemakula
+      given-names: Paul
+    - family-names: Song
+      given-names: Chanjae
+    - family-names: Yi
+      given-names: Mun Yong
+  collection-title: "Medical Image Computing and Computer Assisted Intervention -- MICCAI 2026"
+  year: 2026

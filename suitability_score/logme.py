@@ -11,6 +11,11 @@
 
 from __future__ import annotations
 import numpy as np
+
+from .config import DEFAULT_CONFIG, metric_kwargs
+
+_SHARED = DEFAULT_CONFIG["shared"]
+_DEFAULTS = metric_kwargs(DEFAULT_CONFIG, "logme")
 from numba import njit
 
 
@@ -39,7 +44,7 @@ def mean_pool_slide_embeddings(patch_embeddings: list[np.ndarray]) -> np.ndarray
 _GAUSS_CACHE = {}  # (seed, in_dim, out_dim) -> projection matrix
 
 
-def gaussian_projection(X: np.ndarray, out_dim: int, seed: int = 0) -> np.ndarray:
+def gaussian_projection(X: np.ndarray, out_dim: int = _SHARED["reduce_dim"], seed: int = _SHARED["seed"]) -> np.ndarray:
     """
     Random Gaussian projection:
         R ~ N(0, 1/out_dim)
@@ -74,7 +79,7 @@ def gaussian_projection(X: np.ndarray, out_dim: int, seed: int = 0) -> np.ndarra
 # =========================
 # L2 normalization (single)
 # =========================
-def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+def l2_normalize_rows(X: np.ndarray, eps: float = _SHARED["eps"]) -> np.ndarray:
     norms = np.linalg.norm(X, axis=1, keepdims=True)
     norms = np.maximum(norms, eps)
     return X / norms
@@ -243,10 +248,10 @@ def warmup_logme_numba(verbose: bool = False) -> None:
 def logme_score(
     patch_embeddings: list[np.ndarray],
     labels: np.ndarray,
-    reduce_dim: int | None = None,
-    reduce_seed: int = 0,
-    eps_norm: float = 1e-12,
-    warmup_numba: bool = False,
+    reduce_dim: int | None = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
+    eps_norm: float = _SHARED["eps"],
+    warmup_numba: bool = _DEFAULTS["warmup_numba"],
 ) -> float:
     """
     Compute LogME score (classification).

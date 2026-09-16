@@ -21,21 +21,26 @@ from __future__ import annotations
 import time
 import numpy as np
 
+from .config import DEFAULT_CONFIG, metric_kwargs
+
+_SHARED = DEFAULT_CONFIG["shared"]
+_DEFAULTS = metric_kwargs(DEFAULT_CONFIG, "sam_cluster")
+
 
 # =========================
 # Preprocessing
 # =========================
-def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+def l2_normalize_rows(X: np.ndarray, eps: float = _SHARED["eps"]) -> np.ndarray:
     n = np.linalg.norm(X, axis=1, keepdims=True)
     return X / (n + eps)
 
 
 def gaussian_random_projection(
     X: np.ndarray,
-    out_dim: int = 256,
-    seed: int = 0,
-    eps: float = 1e-12,
-    dtype: np.dtype = np.float32,
+    out_dim: int = _SHARED["reduce_dim"],
+    seed: int = _SHARED["seed"],
+    eps: float = _SHARED["eps"],
+    dtype: np.dtype = _DEFAULTS["dtype"],
 ) -> np.ndarray:
     """
     Random Gaussian projection:
@@ -52,11 +57,11 @@ def gaussian_random_projection(
 
 def preprocess_patches(
     Z: np.ndarray,
-    eps: float = 1e-12,
-    reduce_method: str = "gaussian",  # "none" | "gaussian"
-    reduce_dim: int = 256,
-    reduce_seed: int = 0,
-    dtype: np.dtype = np.float32,
+    eps: float = _SHARED["eps"],
+    reduce_method: str = _DEFAULTS["reduce_method"],  # "none" | "gaussian"
+    reduce_dim: int = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
+    dtype: np.dtype = _DEFAULTS["dtype"],
 ) -> np.ndarray:
     """
     Returns:
@@ -125,14 +130,14 @@ def _calc_ratio_score_fast(
     W: np.ndarray,
     cid: np.ndarray,
     *,
-    n_pairs: int = 20000,
-    rng_seed: int = 0,
-    eps: float = 1e-12,
-    cluster_sampling: str = "uniform",     # "uniform"|"sqrt"|"proportional"
-    topk_exclude: int = 3,
-    sim_threshold: float = 0.9,
-    oversample_factor: float = 6.0,
-    max_seconds: float = 2.0,
+    n_pairs: int = _DEFAULTS["n_pairs"],
+    rng_seed: int = _DEFAULTS["rng_seeds"][0],
+    eps: float = _SHARED["eps"],
+    cluster_sampling: str = _DEFAULTS["cluster_sampling"],     # "uniform"|"sqrt"|"proportional"
+    topk_exclude: int = _DEFAULTS["ratio_topk_exclude"],
+    sim_threshold: float = _DEFAULTS["ratio_sim_threshold"],
+    oversample_factor: float = _DEFAULTS["oversample_factor"],
+    max_seconds: float = _DEFAULTS["max_seconds"],
 ) -> float:
     n, d = W.shape
     if n < 2:
@@ -267,22 +272,22 @@ def sam_ratio_score(
     Z: np.ndarray,
     sam_cluster: np.ndarray,
     *,
-    eps: float = 1e-12,
-    reduce_method: str = "gaussian",   # "none" | "gaussian"
-    reduce_dim: int = 256,
-    reduce_seed: int = 0,
+    eps: float = _SHARED["eps"],
+    reduce_method: str = _DEFAULTS["reduce_method"],   # "none" | "gaussian"
+    reduce_dim: int = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
     # cluster filtering / patch downsampling
-    min_cluster_ratio: float = 0.005,
-    max_patches: int = 6000,
+    min_cluster_ratio: float = _DEFAULTS["min_cluster_ratio"],
+    max_patches: int = _DEFAULTS["max_patches"],
     # sampling
-    n_pairs: int = 20000,
-    rng_seeds: tuple[int, ...] = (0, 1),
-    cluster_sampling: str = "uniform",  # "uniform"|"sqrt"|"proportional"
-    ratio_topk_exclude: int = 3,
-    ratio_sim_threshold: float = 0.9,
-    oversample_factor: float = 6.0,
-    max_seconds: float = 2.0,
-    dtype: np.dtype = np.float32,
+    n_pairs: int = _DEFAULTS["n_pairs"],
+    rng_seeds: tuple[int, ...] = _DEFAULTS["rng_seeds"],
+    cluster_sampling: str = _DEFAULTS["cluster_sampling"],  # "uniform"|"sqrt"|"proportional"
+    ratio_topk_exclude: int = _DEFAULTS["ratio_topk_exclude"],
+    ratio_sim_threshold: float = _DEFAULTS["ratio_sim_threshold"],
+    oversample_factor: float = _DEFAULTS["oversample_factor"],
+    max_seconds: float = _DEFAULTS["max_seconds"],
+    dtype: np.dtype = _DEFAULTS["dtype"],
 ) -> float:
     if Z.ndim != 2:
         raise ValueError(f"Z must be 2D, got {Z.shape}")
@@ -347,20 +352,20 @@ def sam_cluster_score(
     sam_clusters: list[np.ndarray],
     labels: np.ndarray,   # accepted for API alignment; NOT used
     *,
-    eps: float = 1e-12,
-    reduce_method: str = "gaussian",
-    reduce_dim: int = 256,
-    reduce_seed: int = 0,
-    min_cluster_ratio: float = 0.005,
-    max_patches: int = 6000,
-    n_pairs: int = 20000,
-    rng_seeds: tuple[int, ...] = (0, 1),
-    cluster_sampling: str = "uniform",
-    ratio_topk_exclude: int = 3,
-    ratio_sim_threshold: float = 0.9,
-    oversample_factor: float = 6.0,
-    max_seconds: float = 2.0,
-    dtype: np.dtype = np.float32,
+    eps: float = _SHARED["eps"],
+    reduce_method: str = _DEFAULTS["reduce_method"],
+    reduce_dim: int = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
+    min_cluster_ratio: float = _DEFAULTS["min_cluster_ratio"],
+    max_patches: int = _DEFAULTS["max_patches"],
+    n_pairs: int = _DEFAULTS["n_pairs"],
+    rng_seeds: tuple[int, ...] = _DEFAULTS["rng_seeds"],
+    cluster_sampling: str = _DEFAULTS["cluster_sampling"],
+    ratio_topk_exclude: int = _DEFAULTS["ratio_topk_exclude"],
+    ratio_sim_threshold: float = _DEFAULTS["ratio_sim_threshold"],
+    oversample_factor: float = _DEFAULTS["oversample_factor"],
+    max_seconds: float = _DEFAULTS["max_seconds"],
+    dtype: np.dtype = _DEFAULTS["dtype"],
 ) -> float:
     """
     Unified interface:

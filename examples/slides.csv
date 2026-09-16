@@ -1,0 +1,7 @@
+slide_id,wsi_path,label,split,patient_id
+slide_001,/absolute/path/to/slide_001.svs,normal,train,patient_001
+slide_002,/absolute/path/to/slide_002.svs,tumor,train,patient_002
+slide_003,/absolute/path/to/slide_003.svs,normal,train,patient_003
+slide_004,/absolute/path/to/slide_004.svs,tumor,train,patient_004
+slide_005,/absolute/path/to/slide_005.svs,normal,val,patient_005
+slide_006,/absolute/path/to/slide_006.svs,tumor,test,patient_006

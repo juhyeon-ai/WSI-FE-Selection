@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+third_party/
+checkpoints/
+runs/
+*.h5
+*.hdf5
+*.svs
+*.ndpi
+*.mrxs
+*.pth
+*.pt
+*.egg-info/

@@ -11,12 +11,17 @@
 from __future__ import annotations
 import numpy as np
 
+from .config import DEFAULT_CONFIG, metric_kwargs
+
+_SHARED = DEFAULT_CONFIG["shared"]
+_DEFAULTS = metric_kwargs(DEFAULT_CONFIG, "effective_dimension")
+
 
 def pca_effective_dim(
     Z: np.ndarray,
-    explained_var: float = 0.99,
-    center: bool = True,
-    eps: float = 1e-12,
+    explained_var: float = _DEFAULTS["explained_var"],
+    center: bool = _DEFAULTS["center"],
+    eps: float = _SHARED["eps"],
 ) -> int:
     """
     PCA-based effective dimension (integer).

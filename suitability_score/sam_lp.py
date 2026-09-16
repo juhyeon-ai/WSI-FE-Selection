@@ -20,11 +20,16 @@
 from __future__ import annotations
 import numpy as np
 
+from .config import DEFAULT_CONFIG, metric_kwargs
+
+_SHARED = DEFAULT_CONFIG["shared"]
+_DEFAULTS = metric_kwargs(DEFAULT_CONFIG, "sam_lp")
+
 
 # =========================
 # L2 Normalization (row-wise)
 # =========================
-def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+def l2_normalize_rows(X: np.ndarray, eps: float = _SHARED["eps"]) -> np.ndarray:
     norms = np.linalg.norm(X, axis=1, keepdims=True)
     norms = np.maximum(norms, eps)
     return X / norms
@@ -36,7 +41,7 @@ def l2_normalize_rows(X: np.ndarray, eps: float = 1e-12) -> np.ndarray:
 _GAUSS_CACHE = {}  # (seed, in_dim, out_dim) -> R
 
 
-def gaussian_projection(X: np.ndarray, out_dim: int, seed: int = 0) -> np.ndarray:
+def gaussian_projection(X: np.ndarray, out_dim: int = _SHARED["reduce_dim"], seed: int = _SHARED["seed"]) -> np.ndarray:
     """
     Random Gaussian projection:
         R ~ N(0, 1/out_dim),  X' = X R
@@ -92,7 +97,7 @@ def mean_pool_slide_embeddings(patch_embeddings: list[np.ndarray]) -> np.ndarray
 def sam_cluster_centroids(
     Z: np.ndarray,
     sam_cluster: np.ndarray,
-    min_cluster_size: int = 20,
+    min_cluster_size: int = _DEFAULTS["min_cluster_size"],
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Compute per-slide cluster centroids.
@@ -137,11 +142,11 @@ def reembed_slide_from_centroids(
     sizes: np.ndarray,
     y: int,
     clf,
-    select_mode: str = "topk",   # "topk" or "soft"
-    topk: int = 1,
-    beta: float = 5.0,
-    weight_mode: str = "sqrt",   # "none" | "sqrt" | "linear"
-    eps: float = 1e-12,
+    select_mode: str = _DEFAULTS["select_mode"],   # "topk" or "soft"
+    topk: int = _DEFAULTS["topk"],
+    beta: float = _DEFAULTS["beta"],
+    weight_mode: str = _DEFAULTS["weight_mode"],   # "none" | "sqrt" | "linear"
+    eps: float = _SHARED["eps"],
 ) -> np.ndarray:
     """
     Given centroids C (K,d), choose/weight them using classifier confidence for the true label y,
@@ -226,20 +231,20 @@ def sam_lp_score(
     labels: np.ndarray,
     *,
     # logistic regression
-    C_lr: float = 1.0,
-    max_iter: int = 2000,
-    seed: int = 0,
+    C_lr: float = _DEFAULTS["C_lr"],
+    max_iter: int = _DEFAULTS["max_iter"],
+    seed: int = _SHARED["seed"],
     # preprocessing
-    reduce_dim: int | None = None,
-    reduce_seed: int = 0,
-    eps: float = 1e-12,
+    reduce_dim: int | None = _SHARED["reduce_dim"],
+    reduce_seed: int = _SHARED["seed"],
+    eps: float = _SHARED["eps"],
     # SAM centroid + EM
-    em_iters: int = 2,
-    min_cluster_size: int = 20,
-    select_mode: str = "topk",   # "topk" | "soft"
-    topk: int = 1,
-    beta: float = 5.0,
-    weight_mode: str = "sqrt",   # "none" | "sqrt" | "linear"
+    em_iters: int = _DEFAULTS["em_iters"],
+    min_cluster_size: int = _DEFAULTS["min_cluster_size"],
+    select_mode: str = _DEFAULTS["select_mode"],   # "topk" | "soft"
+    topk: int = _DEFAULTS["topk"],
+    beta: float = _DEFAULTS["beta"],
+    weight_mode: str = _DEFAULTS["weight_mode"],   # "none" | "sqrt" | "linear"
 ) -> float:
     """
     Returns:
@@ -266,20 +271,19 @@ def sam_lp_score(
     # ---- (1) fit initial classifier ----
     clf = fit_logreg(X_slide, y, C=C_lr, max_iter=max_iter, seed=seed)
 
+    # Region centroids and their preprocessing do not depend on the classifier.
+    prepared = []
+    if int(em_iters) > 0:
+        for Z, c in zip(patch_embeddings, sam_clusters):
+            Cc, Ss = sam_cluster_centroids(Z, c, min_cluster_size=min_cluster_size)
+            if reduce_dim is not None:
+                Cc = gaussian_projection(Cc, out_dim=int(reduce_dim), seed=int(reduce_seed))
+            prepared.append((l2_normalize_rows(Cc, eps=eps), Ss))
+
     # ---- (2)-(3) EM-like loop ----
     for _ in range(int(em_iters)):
         new_embs = []
-        for i in range(N):
-            Z = patch_embeddings[i]
-            c = sam_clusters[i]
-
-            Cc, Ss = sam_cluster_centroids(Z, c, min_cluster_size=min_cluster_size)
-
-            # centroids preprocessing: same pipeline (projection -> L2 once)
-            if reduce_dim is not None:
-                Cc = gaussian_projection(Cc, out_dim=int(reduce_dim), seed=int(reduce_seed))
-            Cc = l2_normalize_rows(Cc, eps=eps)
-
+        for i, (Cc, Ss) in enumerate(prepared):
             vi = reembed_slide_from_centroids(
                 Cc, Ss, int(y[i]), clf,
                 select_mode=select_mode,
