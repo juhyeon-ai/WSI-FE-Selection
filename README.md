@@ -102,19 +102,37 @@ Every metric is evaluated by the **Spearman rank correlation (ρ)** between its 
 <summary><b>Table 1 · Spearman ρ between each metric and ground-truth MIL performance</b></summary>
 <br>
 
-| Dataset | Eff. Dim. | NESum | Self-Cluster | **SAM-Cluster** (ours) | LogME | Linear Probing | **SAM-LP** (ours) |
-| :-- | --: | --: | --: | --: | --: | --: | --: |
-| Camelyon16 | 0.1030 | 0.3576 | 0.3697 | **0.3939** | -0.1903 | 0.3091 | 0.3212 |
-| BRACS | -0.3939 | 0.0909 | 0.1273 | 0.3212 | -0.2024 | 0.2364 | **0.3697** |
-| UBC-OCEAN | 0.2242 | 0.6485 | 0.6121 | 0.6727 | 0.1806 | **0.8303** | **0.8303** |
-| TCGA-GLIOMA | 0.3818 | 0.3455 | 0.1879 | 0.3697 | **0.5103** | 0.4545 | 0.4424 |
-| TCGA-NSCLC | -0.1636 | 0.4061 | 0.3212 | 0.4909 | 0.1976 | 0.6364 | **0.9515** |
-| TCGA-RCC | 0.0303 | 0.5273 | 0.6485 | 0.7212 | 0.4836 | 0.6364 | **0.7939** |
-| Histai-skin-b1 | 0.3697 | 0.5879 | 0.6606 | **0.7091** | 0.1515 | 0.6727 | **0.7091** |
-| PANDA | 0.5030 | 0.5879 | 0.5636 | 0.6000 | **0.7430** | 0.6121 | 0.5879 |
-| **Average** | 0.1318 | 0.4439 | 0.4364 | 0.5348 | 0.2342 | 0.5485 | **0.6258** |
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2" align="left">Dataset</th>
+      <th colspan="4" align="center">Unsupervised &nbsp;·&nbsp; no slide labels</th>
+      <th colspan="3" align="center">Supervised &nbsp;·&nbsp; with slide labels</th>
+    </tr>
+    <tr>
+      <th align="right">Eff. Dim.</th>
+      <th align="right">NESum</th>
+      <th align="right">Self-Cluster</th>
+      <th align="right">SAM-Cluster<br><sub>ours</sub></th>
+      <th align="right">LogME</th>
+      <th align="right">Linear Probing</th>
+      <th align="right">SAM-LP<br><sub>ours</sub></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Camelyon16</td><td align="right">0.1030</td><td align="right">0.3576</td><td align="right">0.3697</td><td align="right"><b>0.3939</b></td><td align="right">-0.1903</td><td align="right">0.3091</td><td align="right"><b>0.3212</b></td></tr>
+    <tr><td>BRACS</td><td align="right">-0.3939</td><td align="right">0.0909</td><td align="right">0.1273</td><td align="right"><b>0.3212</b></td><td align="right">-0.2024</td><td align="right">0.2364</td><td align="right"><b>0.3697</b></td></tr>
+    <tr><td>UBC-OCEAN</td><td align="right">0.2242</td><td align="right">0.6485</td><td align="right">0.6121</td><td align="right"><b>0.6727</b></td><td align="right">0.1806</td><td align="right"><b>0.8303</b></td><td align="right"><b>0.8303</b></td></tr>
+    <tr><td>TCGA-GLIOMA</td><td align="right"><b>0.3818</b></td><td align="right">0.3455</td><td align="right">0.1879</td><td align="right">0.3697</td><td align="right"><b>0.5103</b></td><td align="right">0.4545</td><td align="right">0.4424</td></tr>
+    <tr><td>TCGA-NSCLC</td><td align="right">-0.1636</td><td align="right">0.4061</td><td align="right">0.3212</td><td align="right"><b>0.4909</b></td><td align="right">0.1976</td><td align="right">0.6364</td><td align="right"><b>0.9515</b></td></tr>
+    <tr><td>TCGA-RCC</td><td align="right">0.0303</td><td align="right">0.5273</td><td align="right">0.6485</td><td align="right"><b>0.7212</b></td><td align="right">0.4836</td><td align="right">0.6364</td><td align="right"><b>0.7939</b></td></tr>
+    <tr><td>Histai-skin-b1</td><td align="right">0.3697</td><td align="right">0.5879</td><td align="right">0.6606</td><td align="right"><b>0.7091</b></td><td align="right">0.1515</td><td align="right">0.6727</td><td align="right"><b>0.7091</b></td></tr>
+    <tr><td>PANDA</td><td align="right">0.5030</td><td align="right">0.5879</td><td align="right">0.5636</td><td align="right"><b>0.6000</b></td><td align="right"><b>0.7430</b></td><td align="right">0.6121</td><td align="right">0.5879</td></tr>
+    <tr><td><b>Average</b></td><td align="right">0.1318</td><td align="right">0.4439</td><td align="right">0.4364</td><td align="right"><b>0.5348</b></td><td align="right">0.2342</td><td align="right">0.5485</td><td align="right"><b>0.6258</b></td></tr>
+  </tbody>
+</table>
 
-<sub>Bold marks the best metric in each row. Each entry averages five random 30-slide subsets (PANDA: 600 slides, because its slides are far smaller). Standard deviations, aggregator-stratified results and resource measurements are in the <a href="docs/paper_details.md">method and results notes</a>; the raw table is in <a href="docs/results/table1.csv">CSV</a>.</sub>
+<sub>Bold marks the best metric within each group for that dataset. Each entry averages five random 30-slide subsets (PANDA: 600 slides, because its slides are far smaller). Standard deviations, aggregator-stratified results and resource measurements are in the <a href="docs/paper_details.md">method and results notes</a>; the raw table is in <a href="docs/results/table1.csv">CSV</a>.</sub>
 
 </details>
 
