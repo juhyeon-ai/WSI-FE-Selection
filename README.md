@@ -163,7 +163,7 @@ A good FE keeps embeddings consistent inside one tissue structure and distinct a
 
 $$
 S_{\text{intra}} = \mathbb{E}_{k}\Big[\mathbb{E}_{z_i, z_j \in Z^{(k)}}\big[(z_i^{\top} z_j)^2\big]\Big], \qquad
-S_{\text{inter}} = \mathbb{E}_{(k,l) \notin \mathcal{E}}\Big[\mathbb{E}_{z_i \in Z^{(k)},\, z_j \in Z^{(l)}}\big[(z_i^{\top} z_j)^2\big]\Big]
+S_{\text{inter}} = \mathbb{E}_{(k,l) \notin \mathcal{E}}\Big[\mathbb{E}_{z_i \in Z^{(k)}, z_j \in Z^{(l)}}\big[(z_i^{\top} z_j)^2\big]\Big]
 $$
 
 $$
@@ -175,9 +175,9 @@ $$
 Instead of mean pooling, each slide is rebuilt from its region prototypes $c_{i,k}$ with weights $\alpha_{i,k}$ that start proportional to mask size. One EM update refines them: the M-step fits a linear classifier $\theta$ on the aggregated embeddings, and the E-step sharpens the weights toward prototypes that predict the label, with $\beta$ controlling the sharpness.
 
 $$
-\tilde{z}_i = \sum_{k} \alpha_{i,k}\, c_{i,k}, \qquad
-\alpha_{i,k}^{(t+1)} \propto \alpha_{i,k}^{(0)} \exp\!\big(\beta \log P(Y_i \mid c_{i,k};\theta^{(t)})\big), \qquad
-S_{\text{SAM-LP}}(\phi) = \frac{1}{N}\sum_{i=1}^{N} \log P\big(Y_i \mid \tilde{z}_i^{*};\theta^{*}\big)
+\tilde{z}_i = \sum_{k} \alpha_{i,k} c_{i,k}, \qquad
+\alpha_{i,k}^{(t+1)} \propto \alpha_{i,k}^{(0)} \exp\big(\beta \log P(Y_i \mid c_{i,k};\theta^{(t)})\big), \qquad
+S_{\text{SAM-LP}}(\phi) = \frac{1}{N}\sum_{i=1}^{N} \log P\big(Y_i \mid \tilde{z}_i^{\ast};\theta^{\ast}\big)
 $$
 
 ### Why it is cheap
