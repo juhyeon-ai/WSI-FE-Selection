@@ -22,61 +22,61 @@ WSI-based computational pathology relies on the Multiple Instance Learning (MIL)
 - **No MIL training** — Rank candidate FEs in minutes rather than weeks.
 - **Structure-aware metrics** — Use SAM masks as pseudo-structural labels, moving beyond the standard i.i.d. patch assumption.
 - **High rank correlation** — Strong Spearman correlation with downstream MIL performance across 8 public WSI datasets.
-- **Cost-efficient & scalable** — Reliable on a small random subset of WSIs (e.g., 30 slides); SAM runs **once per slide**, so cost scales at $\mathcal{O}(1)$ w.r.t. the number of candidate FEs.
+- **Cost-efficient & scalable** — Reliable on a small random subset of WSIs (e.g., 30 slides); SAM runs **once per slide**, so cost scales at $`\mathcal{O}(1)`$ w.r.t. the number of candidate FEs.
 
 ---
 
 ## Method
 
-We define a **Suitability Score** computed from pre-extracted features on a small random WSI subset. Given candidate FEs $\Phi$, we select
+We define a **Suitability Score** computed from pre-extracted features on a small random WSI subset. Given candidate FEs $`\Phi`$, we select
 
-$$
+```math
 \phi^{*} = \arg\max_{\phi \in \Phi} S_{\text{metric}}(\phi).
-$$
+```
 
-**Setup.** The $i$-th WSI is a bag of patches $X_i = \{x_{i,j}\}_{j=1}^{K_i}$ with label $Y_i \in \{1,\dots,C\}$. An FE $\phi:\mathcal{X}\to\mathbb{R}^d$ maps each patch to an embedding $z_{i,j}$, and SAM provides masks $\mathcal{M}=\{M_k\}$ used as pseudo-structural regions.
+**Setup.** The $`i`$-th WSI is a bag of patches $`X_i = \{x_{i,j}\}_{j=1}^{K_i}`$ with label $`Y_i \in \{1,\dots,C\}`$. An FE $`\phi:\mathcal{X}\to\mathbb{R}^d`$ maps each patch to an embedding $`z_{i,j}`$, and SAM provides masks $`\mathcal{M}=\{M_k\}`$ used as pseudo-structural regions.
 
 ### SAM-Cluster (Unsupervised)
 
-An ideal FE keeps **high consistency within a tissue structure** and **clear boundaries between structures**. We measure intra-region cohesion and a *relaxed* inter-region separability, where mask pairs with overly similar centroids are excluded to mitigate SAM over-segmentation. With $L_2$-normalized region mean $c_k = \tfrac{1}{|Z^{(k)}|}\sum_{z\in Z^{(k)}} z$ and exclusion set $\mathcal{E} = \{(k,l)\mid c_k^\top c_l > \tau\}$:
+An ideal FE keeps **high consistency within a tissue structure** and **clear boundaries between structures**. We measure intra-region cohesion and a *relaxed* inter-region separability, where mask pairs with overly similar centroids are excluded to mitigate SAM over-segmentation. With $`L_2`$-normalized region mean $`c_k = \tfrac{1}{|Z^{(k)}|}\sum_{z\in Z^{(k)}} z`$ and exclusion set $`\mathcal{E} = \{(k,l)\mid c_k^\top c_l > \tau\}`$:
 
-$$
+```math
 S_{intra} = \mathbb{E}_{k}\!\left[\mathbb{E}_{z_i,z_j\in Z^{(k)}}\!\left[(z_i^\top z_j)^2\right]\right],
 \qquad
 S_{inter} = \mathbb{E}_{(k,l)\notin\mathcal{E}}\!\left[\mathbb{E}_{z_i\in Z^{(k)},\,z_j\in Z^{(l)}}\!\left[(z_i^\top z_j)^2\right]\right]
-$$
+```
 
-$$
+```math
 S_{\text{SAM-Cluster}}(\phi) = 1 - \frac{S_{inter}}{S_{intra}}
-$$
+```
 
 A higher score indicates superior preservation of histological boundaries.
 
 ### SAM-LP (Supervised)
 
-Conventional mean-pooling Linear Probing suffers from **signal dilution**, where diagnostic signals from small regions (e.g., micrometastases) are overwhelmed by abundant background tissue. SAM-LP reconstructs each slide as a weighted sum of **structural prototypes** $c_{i,k}$ (the $L_2$-normalized mask centroids), with weights initialized proportional to mask size and refined by a **single EM update**:
+Conventional mean-pooling Linear Probing suffers from **signal dilution**, where diagnostic signals from small regions (e.g., micrometastases) are overwhelmed by abundant background tissue. SAM-LP reconstructs each slide as a weighted sum of **structural prototypes** $`c_{i,k}`$ (the $`L_2`$-normalized mask centroids), with weights initialized proportional to mask size and refined by a **single EM update**:
 
-$$
+```math
 \tilde{z}_i^{(t)} = \sum_{k}\alpha_{i,k}^{(t)}\,c_{i,k}, \quad \text{s.t.}\ \sum_k \alpha_{i,k}^{(t)} = 1
-$$
+```
 
-**M-Step** — fix $\tilde{z}_i^{(t)}$, update the linear classifier $\theta^{(t)}$:
+**M-Step** — fix $`\tilde{z}_i^{(t)}`$, update the linear classifier $`\theta^{(t)}`$:
 
-$$
+```math
 \theta^{(t)} = \arg\max_{\theta}\frac{1}{N}\sum_{i=1}^{N}\log P\!\left(Y_i\mid \tilde{z}_i^{(t)};\theta\right)
-$$
+```
 
-**E-Step** — reweight prototypes by their contribution to predicting $Y_i$ ($\beta$ controls sharpness):
+**E-Step** — reweight prototypes by their contribution to predicting $`Y_i`$ ($`\beta`$ controls sharpness):
 
-$$
+```math
 \alpha_{i,k}^{(t+1)} = \frac{\alpha_{i,k}^{(0)}\exp\!\big(\beta\log P(Y_i\mid c_{i,k};\theta^{(t)})\big)}{\sum_{j}\alpha_{i,j}^{(0)}\exp\!\big(\beta\log P(Y_i\mid c_{i,j};\theta^{(t)})\big)}
-$$
+```
 
-The final score evaluates task alignment with the optimized $\tilde{z}_i^{*}$ and $\theta^{*}$:
+The final score evaluates task alignment with the optimized $`\tilde{z}_i^{*}`$ and $`\theta^{*}`$:
 
-$$
+```math
 S_{\text{SAM-LP}}(\phi) = \frac{1}{N}\sum_{i=1}^{N}\log P\!\left(Y_i\mid \tilde{z}_i^{*};\theta^{*}\right)
-$$
+```
 
 > **Default hyperparameters** (used across all experiments): similarity threshold `τ = 0.95` for SAM-Cluster, attention sharpness `β = 5` for SAM-LP. Both metrics are stable over broad ranges and need no dataset-specific tuning.
 
@@ -106,7 +106,7 @@ See the [quickstart](../README.md#quickstart) for the executable workflow. Full 
 
 ### Rank Correlation with Downstream MIL Performance
 
-Spearman's $\rho$ between each metric and the GT MIL ranking across 8 datasets. **Bold** marks the best metric in each row. Standard deviations (after `±`) come from repeating random subset sampling 5× (seeds 0–4); each subset is 30 WSIs, except PANDA (600 WSIs, due to its smaller slide size).
+Spearman's $`\rho`$ between each metric and the GT MIL ranking across 8 datasets. **Bold** marks the best metric in each row. Standard deviations (after `±`) come from repeating random subset sampling 5× (seeds 0–4); each subset is 30 WSIs, except PANDA (600 WSIs, due to its smaller slide size).
 
 | Dataset | Eff. Dim | NESum | Self-Cluster | **SAM-Cluster** | LogME | Linear Prob. | **SAM-LP** |
 | :-- | --: | --: | --: | --: | --: | --: | --: |
@@ -157,20 +157,20 @@ As expected, SAM-LP's linear-probing formulation aligns most closely with Mean P
 
 Exhaustive selection trains every aggregator for every candidate FE over all slides:
 
-$$
+```math
 C_{\text{exhaustive}} = N \times |\Phi| \times (K \times C_{\text{FE}} + M \times C_{\text{aggregator}})
-$$
+```
 
-Our framework uses only $n \ll N$ slides, no aggregator training, and a single SAM pass per slide:
+Our framework uses only $`n \ll N`$ slides, no aggregator training, and a single SAM pass per slide:
 
-$$
+```math
 C_{\text{ours}} = n \times \big[\, |\Phi| \times (K \times C_{\text{FE}} + \alpha) + C_{\text{SAM}} \,\big]
 \quad\Longrightarrow\quad \frac{C_{\text{ours}}}{C_{\text{exhaustive}}} \approx \frac{n}{N}
-$$
+```
 
-On Camelyon16 (RTX A6000): feature extraction ≈ **343 TFLOPs/WSI**, SAM ≈ **2.98 TFLOPs** (< 1% of a single FE extraction), metric overhead $\alpha$ ≈ **3.7 MFLOPs**.
+On Camelyon16 (RTX A6000): feature extraction ≈ **343 TFLOPs/WSI**, SAM ≈ **2.98 TFLOPs** (< 1% of a single FE extraction), metric overhead $`\alpha`$ ≈ **3.7 MFLOPs**.
 
-- **Single-pass prior** — SAM masks computed once per WSI, $\mathcal{O}(1)$ w.r.t. $|\Phi|$.
+- **Single-pass prior** — SAM masks computed once per WSI, $`\mathcal{O}(1)`$ w.r.t. $`|\Phi|`$.
 - **Lightweight scoring** — LP and SAM-LP fit a linear classifier on pre-extracted embeddings; no MIL aggregator is trained.
 - **Subset reliability** — Cost scales only with the number of sampled WSIs.
 
@@ -266,7 +266,7 @@ Verified from the `sam_cluster` attributes embedded in generated `.h5` files (e.
 
 | Hyperparameter | Metric | Value | Notes |
 | :-- | :-- | :-- | :-- |
-| `τ` (centroid-similarity threshold, Eq. for $S_{inter}$) | SAM-Cluster | 0.95 | Stable over a broad range |
+| `τ` (centroid-similarity threshold, Eq. for $`S_{inter}`$) | SAM-Cluster | 0.95 | Stable over a broad range |
 | `β` (attention sharpness, E-Step) | SAM-LP | 5 | Stable over a broad range |
 | Subset size `n` | both | 30 WSIs (PANDA: 20× instances) | Repeated 5× (seeds 0–4) |
 
