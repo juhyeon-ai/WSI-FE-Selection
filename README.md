@@ -29,11 +29,12 @@ Korea Advanced Institute of Science and Technology (KAIST)<br>
 
 <br>
 
-<p align="center">
-  <img src="assets/overview.png" width="100%" alt="Overview of the structure-aware feature-extractor evaluation framework. (a) Thirty randomly sampled WSIs are patched, embedded by each candidate feature extractor and segmented once by SAM; SAM-Cluster (unsupervised) and SAM-LP (supervised) turn the embeddings and region masks into a suitability score that ranks the candidates. (b) SAM-Cluster measures intra-region cohesion against relaxed inter-region separation. (c) SAM-LP reweights structural prototypes with one EM step before linear probing.">
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/overview_dark.svg">
+  <img src="assets/overview_light.svg" width="100%" alt="Two routes from the same candidate feature extractors to the best one for a cohort. The usual route trains 9 MIL aggregators times 5 seeds for each of 10 extractors on the whole cohort, 450 trainings per dataset, and compares accuracy. The suitability test scores each extractor on 30 random slides with SAM regions, using SAM-Cluster without labels or SAM-LP with labels, ranks the candidates in seconds per extractor, and agrees with the exhaustive ranking at a mean Spearman rho of 0.63.">
+</picture>
 
-<p align="center"><sub><b>Figure 1.</b> Candidate feature extractors are ranked from a 30-slide sample and one SAM pass per slide. No MIL aggregator is trained.</sub></p>
+<p align="center"><sub><b>Figure 1.</b> Same question, two routes. Exhaustive search trains every MIL model on the whole cohort. The suitability test scores each candidate on 30 random slides with SAM regions and ranks them, with no MIL training. The winner shown is an example.</sub></p>
 
 <br>
 
